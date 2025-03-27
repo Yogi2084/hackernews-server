@@ -1,12 +1,14 @@
 import { Hono } from "hono";
 import { tokenMiddleware } from "./middleware/token-middleware";
 import {
-  createPost} from "../controllers/posts/post-controller";
+  createPost,
+  GetAllPostsForUser} from "../controllers/posts/post-controller";
 import {
   DeletePostError,
   GetPostsError,
   PostStatus,
 } from "../controllers/posts/post-types";
+import { getPagination } from "../extras/pagination";
 
 export const postsRoutes = new Hono();
 postsRoutes.post("/create", tokenMiddleware, async (context) => {
@@ -42,3 +44,28 @@ postsRoutes.post("/create", tokenMiddleware, async (context) => {
     return context.json({ error: "Server error" }, 500);
   }
 });
+
+postsRoutes.get("/me", tokenMiddleware, async (context) => {
+    try {
+      const userId = context.get("userId"); // From tokenMiddleware
+      if (!userId) {
+        return context.json({ error: "Unauthorized" }, 401);
+      }
+  
+      const { page, limit } = getPagination(context);
+  
+      const result = await GetAllPostsForUser({ userId, page, limit });
+  
+      return context.json(result, 200);
+    } catch (error) {
+      console.error(error);
+      if (error === GetPostsError.POSTS_NOT_FOUND) {
+        return context.json({ error: "Posts not found" }, 404);
+      }
+      if (error === GetPostsError.PAGE_BEYOND_LIMIT) {
+        return context.json({ error: "No posts found on the requested page" }, 404);
+      }
+      return context.json({ error: "Unknown error" }, 500);
+    }
+  });
+  

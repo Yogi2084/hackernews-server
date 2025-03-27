@@ -16,6 +16,9 @@ export type PostCreateResult = {
   export enum GetPostsError {
     NO_POSTS_FOUND = "NO_POSTS_FOUND",
     UNKNOWN = "UNKNOWN",
+    USER_NOT_FOUND = "USER_NOT_FOUND",
+    POSTS_NOT_FOUND = "POSTS_NOT_FOUND",
+    PAGE_BEYOND_LIMIT = "PAGE_BEYOND_LIMIT",
   }
   
   export enum DeletePostError {
