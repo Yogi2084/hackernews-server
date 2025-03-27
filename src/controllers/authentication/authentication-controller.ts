@@ -55,21 +55,15 @@ export const signUpWithUsernameAndPassword = async (parameters: {
     const user = await prisma.user.create({
       data: {
         username: parameters.username,
-        password: hashedPassword,
-        name: ""
+        password: hashedPassword
       },
     });
 
     //Generate Token
-    const jwtPayload: jwt.JwtPayload = {
-      iss: "http://purpleshorts.co.in",
-      sub: user.id,
-      username: user.username,
-    };
-
-    const token = jwt.sign(jwtPayload, jwtSecret, {
-      expiresIn: "30d",
-    });
+    const token  = createJWToken({
+      id: user.id,
+      username: user.username
+     });
 
     const result: SignUpWithUsernameAndPasswordResult = {
       token,
@@ -86,7 +80,6 @@ export const signUpWithUsernameAndPassword = async (parameters: {
 export const logInWithUsernameAndPassword = async (parameters: {
   username: string;
   password: string;
-  name: string;
 }): Promise<LogInWithUsernameAndPasswordResult> => {
   const passwordHash = createPasswordHash({
     password: parameters.password,
@@ -95,8 +88,7 @@ export const logInWithUsernameAndPassword = async (parameters: {
   const user = await prisma.user.findUnique({
     where: {
       username: parameters.username,
-      password: passwordHash,
-      name: parameters.name
+      password: passwordHash
     },
   });
 
