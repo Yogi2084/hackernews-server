@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { tokenMiddleware } from "./middleware/token-middleware";
 import {
   createPost,
+  deletePost,
   GetAllPosts,
   GetAllPostsForUser} from "../controllers/posts/post-controller";
 import {
@@ -88,7 +89,35 @@ postsRoutes.get("/me", tokenMiddleware, async (context) => {
     return context.json({ error: "Unknown error" }, 500);
   }
 });
+
+//Delete Post
+postsRoutes.delete("/:id", tokenMiddleware, async (context) => {
+    try {
+      const userId = context.get("userId"); // Extracted from tokenMiddleware
+      const postId = context.req.param("id");
   
-
-
-
+      if (!userId) {
+        return context.json({ error: "Unauthorized" }, 401);
+      }
+  
+      const result = await deletePost({ postId, userId });
+  
+      // Handle errors based on DeletePostError enum
+      if (result === DeletePostError.POST_NOT_FOUND) {
+        return context.json({ error: "Post not found" }, 404);
+      }
+  
+      if (result === DeletePostError.UNAUTHORIZED) {
+        return context.json({ error: "You are not allowed to delete this post" }, 403);
+      }
+  
+      if (result === DeletePostError.DELETE_FAILED) {
+        return context.json({ error: "Failed to delete post" }, 500);
+      }
+  
+      return context.json({ message: "Post deleted successfully" }, 200);
+    } catch (error) {
+      console.error("Unexpected error:", error);
+      return context.json({ error: "Internal server error" }, 500);
+    }
+  });

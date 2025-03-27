@@ -7,6 +7,9 @@ export type PostCreateResult = {
     USER_NOT_FOUND = "USER_NOT_FOUND",
     POST_CREATED = "POST_CREATED",
     POST_CREATION_FAILED = "POST_CREATION_FAILED",
+    SUCCESS = "SUCCESS",
+    POST_NOT_FOUND = "POST_NOT_FOUND",
+    DELETE_POST_FAILED = "DELETE_POST_FAILED",
   }
   
   export type GetPostsResult = {
@@ -26,5 +29,6 @@ export type PostCreateResult = {
     POST_NOT_FOUND = "POST_NOT_FOUND",
     DELETE_SUCCESS = "DELETE_SUCCESS",
     DELETE_FAILED = "DELETE_FAILED",
+    UNKNOWN = "UNKNOWN",
   }
   
