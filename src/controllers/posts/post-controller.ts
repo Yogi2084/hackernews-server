@@ -87,4 +87,49 @@ export const createPost = async (parameters: {
       throw GetPostsError.UNKNOWN;
     }
   };
+
+  //Get All posts
+  export const GetAllPosts = async (parameter: {
+    page: number;
+    limit: number;
+  }): Promise<GetPostsResult> => {
+    try {
+      const { page, limit } = parameter;
+      const skip = (page - 1) * limit;
   
+      // Count total posts
+      const totalPosts = await prisma.post.count();
+      if (totalPosts === 0) {
+        throw GetPostsError.NO_POSTS_FOUND;
+      }
+  
+      // Check if the requested page exists
+      const totalPages = Math.ceil(totalPosts / limit);
+      if (page > totalPages) {
+        throw GetPostsError.PAGE_BEYOND_LIMIT;
+      }
+  
+      // get all posts
+      const posts = await prisma.post.findMany({
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: limit,
+        include: {
+            user: {
+              select: {
+                name:true,
+                username: true,
+              },
+            },
+          },
+      });
+  
+      return { posts };
+    } catch (e) {
+      console.error(e);
+      if (e === GetPostsError.NO_POSTS_FOUND || e === GetPostsError.PAGE_BEYOND_LIMIT) {
+        throw e;
+      }
+      throw GetPostsError.UNKNOWN;
+    }
+  };

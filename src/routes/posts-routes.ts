@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { tokenMiddleware } from "./middleware/token-middleware";
 import {
   createPost,
+  GetAllPosts,
   GetAllPostsForUser} from "../controllers/posts/post-controller";
 import {
   DeletePostError,
@@ -68,4 +69,26 @@ postsRoutes.get("/me", tokenMiddleware, async (context) => {
       return context.json({ error: "Unknown error" }, 500);
     }
   });
+
+  postsRoutes.get("/all", async (context) => {
+  try {
+    const { page, limit } = getPagination(context);
+
+    const result = await GetAllPosts({ page, limit });
+
+    return context.json(result, 200);
+  } catch (error) {
+    console.error(error);
+    if (error === GetPostsError.NO_POSTS_FOUND) {
+      return context.json({ error: "Posts not found" }, 404);
+    }
+    if (error === GetPostsError.PAGE_BEYOND_LIMIT) {
+      return context.json({ error: "No posts found on the requested page" }, 404);
+    }
+    return context.json({ error: "Unknown error" }, 500);
+  }
+});
   
+
+
+
