@@ -13,7 +13,7 @@ export const tokenMiddleware = createMiddleware<{
   if (!token) {
     return context.json({ error: "Unauthorized" }, 401);
   }
-
+  
   try {
     const payload = jwt.verify(token, jwtSecret) as jwt.JwtPayload;
 
