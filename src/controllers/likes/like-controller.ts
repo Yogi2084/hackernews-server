@@ -105,3 +105,35 @@ export const GetAllLikesForPost = async (parameter: {
     throw LikeStatus.UNKNOWN;
   }
 };
+
+export const deleteLike = async (params: { postId: string; userId: string }): 
+    Promise<{ status: DeleteLikeError }> => {
+    try {
+      const { postId, userId } = params;
+
+      const post = await prisma.post.findUnique({
+        where: { id: postId },
+      });
+  
+      if (!post) {
+        return { status: DeleteLikeError.POST_NOT_FOUND };
+      }
+  
+      const like = await prisma.like.findFirst({
+        where: { postId, userId },
+      });
+
+      if (!like) {
+        return { status: DeleteLikeError.LIKE_NOT_FOUND };
+      }
+  
+      await prisma.like.delete({
+        where: { id: like.id },
+      });
+  
+      return { status: DeleteLikeError.DELETE_SUCCESS};
+    } catch (error) {
+      console.error(error);
+      return { status: DeleteLikeError.DELETE_FAILED };
+    }
+  };

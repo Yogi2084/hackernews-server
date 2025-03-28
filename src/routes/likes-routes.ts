@@ -1,7 +1,9 @@
 import { Hono } from "hono";
 import { tokenMiddleware } from "./middleware/token-middleware";
 import { getPagination } from "../extras/pagination";
-import { GetAllLikesForPost, LikeStatus, createLike } from "../controllers/likes/like-controller";
+import { GetAllLikesForPost, LikeStatus, createLike, deleteLike } from "../controllers/likes/like-controller";
+import { prisma } from "../extras/prisma";
+import { DeleteLikeError } from "../controllers/likes/like-types";
 
 
 export const likesRoutes = new Hono();
@@ -60,5 +62,20 @@ likesRoutes.post("/on/:postId", tokenMiddleware, async (context) => {
         return context.json({ error: "No likes found on the requested page" }, 404);
       }
       return context.json({ error: "Unknown error" }, 500);
+    }
+  });
+  likesRoutes.delete("/on/:postId", tokenMiddleware, async (context) => {
+    try {
+      const userId = context.get("userId"); // From tokenMiddleware 
+      const postId = context.req.param("postId");
+      if (!postId) {
+        return context.json({ error: "Post ID is required" }, 400);
+      }
+      // Delete the like
+      const result = await deleteLike({ postId, userId });
+      return context.json(result, 200);
+    } catch (error) {
+      console.error(error);
+      return context.json({ error: DeleteLikeError.UNKNOWN }, 500);
     }
   });
