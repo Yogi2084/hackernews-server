@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { tokenMiddleware } from "./middleware/token-middleware";
-import { CreateComment, GetComments, UpdateComment } from "../controllers/comments/comment-controller";
-import { CreateCommentError, GetCommentsError, UpdateCommentError, type UpdateCommentResult } from "../controllers/comments/comment-types";
+import { CreateComment, DeleteComment, GetComments, UpdateComment } from "../controllers/comments/comment-controller";
+import { CreateCommentError, DeleteCommentError, GetCommentsError, UpdateCommentError, type UpdateCommentResult } from "../controllers/comments/comment-types";
 import { getPagination } from "../extras/pagination";
 import { prisma } from "../extras/prisma";
 
@@ -73,4 +73,23 @@ commentsRoutes.post("/on/:postId", tokenMiddleware, async (c) => {
     }
   });
   
+  commentsRoutes.delete("/:commentId", tokenMiddleware, async (c) => {
+    try {
+      const commentId = c.req.param("commentId");
+      const userId = c.get("userId");
+      await DeleteComment({ commentId, userId });
+      return c.json({ message: "Comment deleted successfully" }, 200);
+    } catch (error) {
+      if (error === DeleteCommentError.COMMENT_NOT_FOUND) {
+        return c.json({ error: "Comment not found" }, 404);
+      }
+      if (error === DeleteCommentError.UNAUTHORIZED) {
+        return c.json({ error: "You can only delete your own comments" }, 403);
+      }
+      return c.json({ error: "Unknown error" }, 500);
+    }
+  });
+
+
+
 
