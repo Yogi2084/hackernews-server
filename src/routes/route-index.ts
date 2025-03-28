@@ -4,6 +4,7 @@ import { logger } from "hono/logger";
 import { usersRoutes } from "./user-routes";
 import { postsRoutes } from "./posts-routes";
 import { likesRoutes } from "./likes-routes";
+import { commentsRoutes } from "./comments-routes";
 
 export const allRoutes = new Hono();
 
@@ -14,6 +15,7 @@ allRoutes.route("/authentication", authenticationRoutes);
 allRoutes.route("/users", usersRoutes)
 allRoutes.route("/posts", postsRoutes)
 allRoutes.route("/likes", likesRoutes)
+allRoutes.route("/comments", commentsRoutes);
 
 allRoutes.get(
   "/health",
