@@ -1,7 +1,9 @@
+import { Hono } from "hono";
 import { getPagination } from "../../extras/pagination";
 import {prisma} from "../../extras/prisma";
 import {LikeStatus, DeleteLikeError,type CreateLike,type GetLikesResult} from "./like-types";
 
+export { LikeStatus };
 export const createLike = async (params: {
     postId: string;
     userId: string;
@@ -44,5 +46,62 @@ export const createLike = async (params: {
     }
   };
 
-export { LikeStatus };
   
+
+export const GetAllLikesForPost = async (parameter: {
+  postId: string;
+  page: number;
+  limit: number;
+}): Promise<GetLikesResult> => {
+  try {
+    const { postId, page, limit } = parameter;
+    const skip = (page - 1) * limit;
+
+    // Check if the post exists
+    const postExists = await prisma.post.findUnique({ where: { id: postId } });
+    if (!postExists) {
+      throw LikeStatus.POST_NOT_FOUND;
+    }
+
+    // Check if the post has any likes
+    const totalLikes = await prisma.like.count({ where: { postId } });
+    if (totalLikes === 0) {
+      throw LikeStatus.NO_LIKES_FOUND;
+    }
+
+    // Check if the requested page exists
+    const totalPages = Math.ceil(totalLikes / limit);
+    if (page > totalPages) {
+      throw LikeStatus.LIKE_NOT_FOUND;
+    }
+
+    // Fetch the likes
+    const likes = await prisma.like.findMany({
+      where: { postId },
+      orderBy: { createdAt: "desc" },
+      skip,
+      take: limit,
+      include: 
+      { user:{
+        select:{
+            id: true,
+            name: true,
+            username: true,
+          },
+        },
+    }
+    });
+
+    return { likes };
+  } catch (e) {
+    console.error(e);
+    if (
+      e === LikeStatus.POST_NOT_FOUND ||
+      e === LikeStatus.NO_LIKES_FOUND ||
+      e === LikeStatus.LIKE_NOT_FOUND
+    ) {
+      throw e;
+    }
+    throw LikeStatus.UNKNOWN;
+  }
+};
