@@ -1,8 +1,9 @@
 import { Hono } from "hono";
 import { tokenMiddleware } from "./middleware/token-middleware";
-import { CreateComment, GetComments } from "../controllers/comments/comment-controller";
-import { CreateCommentError, GetCommentsError } from "../controllers/comments/comment-types";
+import { CreateComment, GetComments, UpdateComment } from "../controllers/comments/comment-controller";
+import { CreateCommentError, GetCommentsError, UpdateCommentError, type UpdateCommentResult } from "../controllers/comments/comment-types";
 import { getPagination } from "../extras/pagination";
+import { prisma } from "../extras/prisma";
 
 export const commentsRoutes = new Hono();
 
@@ -44,4 +45,32 @@ commentsRoutes.post("/on/:postId", tokenMiddleware, async (c) => {
       return c.json({ error: "Unknown error" }, 500);
     }
   }); 
+
+  commentsRoutes.patch("/:commentId", tokenMiddleware, async (c) => {
+    try {
+      const commentId = c.req.param("commentId");
+      const userId = c.get("userId");
+      const { content } = await c.req.json();
+      const result = await UpdateComment({ commentId, userId, content });
+      return c.json({result}, 200);
+    } catch (error) {
+      if (error === UpdateCommentError.COMMENT_NOT_FOUND) {
+        return c.json({ error: "Comment not found" }, 404);
+      }
+      if (error === UpdateCommentError.INVALID_INPUT) {
+        return c.json({ error: "Comment content is required" }, 400);
+      }
+      if (error === UpdateCommentError.NO_CHANGES) {
+        return c.json({ error: "No changes detected in comment content" }, 400);
+      }
+      if (error === UpdateCommentError.UNAUTHORIZED) {
+        return c.json(
+          { error: "You are not authorized to edit this comment" },
+          403
+        );
+      }
+      return c.json({ error: "Unknown error" }, 500);
+    }
+  });
+  
 

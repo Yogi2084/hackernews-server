@@ -1,5 +1,5 @@
 import { prisma } from "../../extras/prisma";
-import { CreateCommentError, GetCommentsError, type CreateCommentResult, type GetCommentsResult } from "./comment-types";
+import { CreateCommentError, GetCommentsError, UpdateCommentError, type CreateCommentResult, type GetCommentsResult, type UpdateCommentResult } from "./comment-types";
 
 
 export const GetComments = async (parameters: {
@@ -114,4 +114,66 @@ export const CreateComment = async (parameters: {
       throw CreateCommentError.UNKNOWN;
     }
   };
+
+  export const UpdateComment = async (parameters: {
+    commentId: string;
+    userId: string;
+    content: string;
+  }): Promise<UpdateCommentResult> => {
+    try {
+      const { commentId, userId, content } = parameters;
+  
+      if (!content.trim()) {
+        throw UpdateCommentError.INVALID_INPUT;
+      }
+  
+      const existingComment = await prisma.comment.findUnique({
+        where: { id: commentId },
+      });
+  
+      if (!existingComment) {
+        throw UpdateCommentError.COMMENT_NOT_FOUND;
+      }
+  
+      if (existingComment.userId !== userId) {
+        throw UpdateCommentError.UNAUTHORIZED;
+      }
+  
+      if (
+        existingComment.content.toLowerCase().trim() ===
+        content.toLowerCase().trim()
+      ) {
+        throw UpdateCommentError.NO_CHANGES;
+      }
+  
+      const comment = await prisma.comment.update({
+        where: { id: commentId },
+        data: { content },
+        include: {
+          user: {
+            select: {
+              username: true,
+              name: true,
+            },
+          },
+        },
+      });
+  
+      return { comment };
+    } catch (e) {
+      console.error(e);
+      if (
+        e === UpdateCommentError.COMMENT_NOT_FOUND ||
+        e === UpdateCommentError.INVALID_INPUT ||
+        e === UpdateCommentError.NO_CHANGES ||
+        e === UpdateCommentError.UNAUTHORIZED
+      ) {
+        throw e;
+      }
+      throw UpdateCommentError.UNKNOWN;
+    }
+  };
+  
+  
+  
   
