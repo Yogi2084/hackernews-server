@@ -6,7 +6,8 @@ import {
   type SignUpWithUsernameAndPasswordResult,
 } from "./authentication-types";
 import { prisma } from "../../extras/prisma";
-import jwt from "jsonwebtoken";
+import * as jwt from 'jsonwebtoken';
+
 import { jwtSecret } from "../../../environment";
 
 export const createPasswordHash = (parameters: {
