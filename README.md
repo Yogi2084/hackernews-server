@@ -97,14 +97,3 @@ By default, the server runs on `http://localhost:3000/`.
 - `PATCH /comments/:commentId` – Updates a user's comment.
 
 
-## 🤝 Contributing
-
-1. Fork the repository.
-2. Create a new branch (`git checkout -b feature-branch`).
-3. Make your changes and commit (`git commit -m 'Add new feature'`).
-4. Push to the branch (`git push origin feature-branch`).
-5. Open a Pull Request.
-
-
-
-🌐 "Because every great discussion starts with a rock-solid backend—engineered for the front page!"
