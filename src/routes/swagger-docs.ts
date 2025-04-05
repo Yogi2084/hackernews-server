@@ -7,7 +7,7 @@ swaggerDocument.get("/docs", (c) => {
     openapi: "3.0.0",
     info: {
       title: "Hackernews API",
-      version: "2.3.3",
+      version: "2.3.7",
       description: "HackerNews clone server",
       contact: {
         name: "HackerNews-Server",
