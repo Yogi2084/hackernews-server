@@ -52,3 +52,4 @@ authenticationRoutes.post("/log-in", async (c) => {
     return c.json({ error: "Unknown error" }, 500);
   }
 });
+
