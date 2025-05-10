@@ -1,5 +1,5 @@
 import { betterAuth } from "better-auth";
-import { betterAuthSecret, serverUrl, webClientUrl } from "../../environment";
+import { serverUrl, webClientUrl } from "../../environment";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prismaClient } from "./prisma";
 
