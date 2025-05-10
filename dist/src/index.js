@@ -1,7 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-require("dotenv/config");
-const route_index_1 = require("./routes/route-index");
+if (process.env.NODE_ENV !== "production") {
+    require("dotenv/config"); // Load .env only in development
+}
 const node_server_1 = require("@hono/node-server");
-console.log(`Server started at http://localhost:${3000}`);
-(0, node_server_1.serve)(route_index_1.allRoutes);
+const routes_index_1 = require("./routes/routes-index");
+(0, node_server_1.serve)(routes_index_1.allRoutes, (info) => {
+    console.log(`Server is running on http://localhost:${info.port}`);
+});

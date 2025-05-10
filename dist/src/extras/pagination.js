@@ -5,7 +5,7 @@ const getPagination = (context) => {
     const page = parseInt(context.req.query("page") || "1", 10);
     const limit = parseInt(context.req.query("limit") || "10", 10);
     const safePage = isNaN(page) || page < 1 ? 1 : page;
-    const safeLimit = isNaN(limit) || limit < 1 ? 10 : limit;
+    const safeLimit = isNaN(limit) || limit < 1 ? 3 : limit;
     return {
         page: safePage,
         limit: safeLimit,
